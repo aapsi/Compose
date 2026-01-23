@@ -5,12 +5,15 @@ pragma solidity >=0.8.30;
  * https://compose.diamonds
  */
 
-import "../../../../../src/token/ERC1155/ERC1155Mod.sol" as ERC1155Mod;
+import "../../../../../src/token/ERC1155/Mint/ERC1155MintMod.sol" as MintMod;
+import "../../../../../src/token/ERC1155/Burn/ERC1155BurnMod.sol" as BurnMod;
+import "../../../../../src/token/ERC1155/Transfer/ERC1155TransferMod.sol" as TransferMod;
+import "../../../../../src/token/ERC1155/Metadata/ERC1155MetadataMod.sol" as MetadataMod;
 
 /**
  * @title ERC1155Harness
  * @notice Test harness that exposes LibERC1155's internal functions as external
- * @dev Required for testing since LibERC1155 only has internal functions
+ * @dev Required for testing since the Mod files only have internal functions
  */
 contract ERC1155Harness {
     /**
@@ -18,73 +21,72 @@ contract ERC1155Harness {
      * @dev Only used for testing
      */
     function initialize(string memory _uri) external {
-        ERC1155Mod.ERC1155Storage storage s = ERC1155Mod.getStorage();
-        s.uri = _uri;
+        MetadataMod.setURI(_uri);
     }
 
     /**
      * @notice Set the base URI
      */
     function setBaseURI(string memory _baseURI) external {
-        ERC1155Mod.setBaseURI(_baseURI);
+        MetadataMod.setBaseURI(_baseURI);
     }
 
     /**
      * @notice Set a token-specific URI
      */
     function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
-        ERC1155Mod.setTokenURI(_tokenId, _tokenURI);
+        MetadataMod.setTokenURI(_tokenId, _tokenURI);
     }
 
     /**
-     * @notice Exposes ERC1155Mod.mint as an external function
+     * @notice Exposes mint as an external function
      */
     function mint(address _to, uint256 _id, uint256 _value) external {
-        ERC1155Mod.mint(_to, _id, _value, new bytes(0));
+        MintMod.mint(_to, _id, _value, new bytes(0));
     }
 
     /**
-     * @notice Exposes ERC1155Mod.mintBatch as an external function
+     * @notice Exposes mintBatch as an external function
      */
     function mintBatch(address _to, uint256[] memory _ids, uint256[] memory _values) external {
-        ERC1155Mod.mintBatch(_to, _ids, _values, new bytes(0));
+        MintMod.mintBatch(_to, _ids, _values, new bytes(0));
     }
 
     /**
-     * @notice Exposes ERC1155Mod.burn as an external function
+     * @notice Exposes burn as an external function
      */
     function burn(address _from, uint256 _id, uint256 _value) external {
-        ERC1155Mod.burn(_from, _id, _value);
+        BurnMod.burn(_from, _id, _value);
     }
 
     /**
-     * @notice Exposes ERC1155Mod.burnBatch as an external function
+     * @notice Exposes burnBatch as an external function
      */
     function burnBatch(address _from, uint256[] memory _ids, uint256[] memory _values) external {
-        ERC1155Mod.burnBatch(_from, _ids, _values);
+        BurnMod.burnBatch(_from, _ids, _values);
     }
 
     /**
-     * @notice Exposes ERC1155Mod.safeTransferFrom as an external function
+     * @notice Exposes safeTransferFrom as an external function
      */
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value) external {
-        ERC1155Mod.safeTransferFrom(_from, _to, _id, _value, msg.sender);
+        TransferMod.safeTransferFrom(_from, _to, _id, _value, msg.sender);
     }
 
     /**
-     * @notice Exposes ERC1155Mod.safeBatchTransferFrom as an external function
+     * @notice Exposes safeBatchTransferFrom as an external function
      */
     function safeBatchTransferFrom(address _from, address _to, uint256[] memory _ids, uint256[] memory _values)
         external
     {
-        ERC1155Mod.safeBatchTransferFrom(_from, _to, _ids, _values, msg.sender);
+        TransferMod.safeBatchTransferFrom(_from, _to, _ids, _values, msg.sender);
     }
 
     /**
      * @notice Get the URI for a token type
      */
     function uri(uint256 _id) external view returns (string memory) {
-        ERC1155Mod.ERC1155Storage storage s = ERC1155Mod.getStorage();
+        MetadataMod.ERC1155MetadataStorage storage s = MetadataMod.getStorage();
         string memory tokenURI = s.tokenURIs[_id];
         return bytes(tokenURI).length > 0 ? string.concat(s.baseURI, tokenURI) : s.uri;
     }
@@ -93,7 +95,7 @@ contract ERC1155Harness {
      * @notice Get the balance of an account for a token type
      */
     function balanceOf(address _account, uint256 _id) external view returns (uint256) {
-        return ERC1155Mod.getStorage().balanceOf[_id][_account];
+        return MintMod.getStorage().balanceOf[_id][_account];
     }
 
     /**
@@ -106,7 +108,7 @@ contract ERC1155Harness {
     {
         require(_accounts.length == _ids.length, "Length mismatch");
         uint256[] memory balances = new uint256[](_accounts.length);
-        ERC1155Mod.ERC1155Storage storage s = ERC1155Mod.getStorage();
+        MintMod.ERC1155Storage storage s = MintMod.getStorage();
         for (uint256 i = 0; i < _accounts.length; i++) {
             balances[i] = s.balanceOf[_ids[i]][_accounts[i]];
         }
@@ -117,14 +119,14 @@ contract ERC1155Harness {
      * @notice Check if an operator is approved for all tokens of an account
      */
     function isApprovedForAll(address _account, address _operator) external view returns (bool) {
-        return ERC1155Mod.getStorage().isApprovedForAll[_account][_operator];
+        return MintMod.getStorage().isApprovedForAll[_account][_operator];
     }
 
     /**
      * @notice Set approval for an operator
      */
     function setApprovalForAll(address _operator, bool _approved) external {
-        ERC1155Mod.ERC1155Storage storage s = ERC1155Mod.getStorage();
+        MintMod.ERC1155Storage storage s = MintMod.getStorage();
         s.isApprovedForAll[msg.sender][_operator] = _approved;
     }
 }

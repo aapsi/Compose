@@ -7,7 +7,7 @@ pragma solidity >=0.8.30;
 
 import {Test} from "forge-std/Test.sol";
 import {ERC1155FacetHarness} from "./harnesses/ERC1155FacetHarness.sol";
-import {ERC1155Facet} from "../../../../src/token/ERC1155/ERC1155Facet.sol";
+import {ERC1155TransferFacet} from "../../../../src/token/ERC1155/Transfer/ERC1155TransferFacet.sol";
 import {ERC1155ReceiverMock} from "./mocks/ERC1155ReceiverMock.sol";
 
 contract ERC1155FacetTest is Test {
@@ -127,7 +127,7 @@ contract ERC1155FacetTest is Test {
         uint256[] memory ids = new uint256[](1);
         ids[0] = TOKEN_ID_1;
 
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidArrayLength.selector, 1, 2));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidArrayLength.selector, 1, 2));
         facet.balanceOfBatch(accounts, ids);
     }
 
@@ -224,7 +224,7 @@ contract ERC1155FacetTest is Test {
 
     function test_RevertWhen_SetApprovalForAllZeroAddress() public {
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidOperator.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155FacetHarness.ERC1155InvalidOperator.selector, address(0)));
         facet.setApprovalForAll(address(0), true);
     }
 
@@ -331,13 +331,13 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(0)));
         facet.safeTransferFrom(alice, address(0), TOKEN_ID_1, 30, "");
     }
 
     function test_RevertWhen_SafeTransferFromFromZeroAddress() public {
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidSender.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidSender.selector, address(0)));
         facet.safeTransferFrom(address(0), bob, TOKEN_ID_1, 30, "");
     }
 
@@ -345,7 +345,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155MissingApprovalForAll.selector, bob, alice));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155MissingApprovalForAll.selector, bob, alice));
         facet.safeTransferFrom(alice, charlie, TOKEN_ID_1, 30, "");
     }
 
@@ -354,7 +354,9 @@ contract ERC1155FacetTest is Test {
 
         vm.prank(alice);
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 100, 150, TOKEN_ID_1)
+            abi.encodeWithSelector(
+                ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 100, 150, TOKEN_ID_1
+            )
         );
         facet.safeTransferFrom(alice, bob, TOKEN_ID_1, 150, "");
     }
@@ -362,7 +364,7 @@ contract ERC1155FacetTest is Test {
     function test_RevertWhen_SafeTransferFromZeroBalance() public {
         vm.prank(alice);
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 0, 1, TOKEN_ID_1)
+            abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 0, 1, TOKEN_ID_1)
         );
         facet.safeTransferFrom(alice, bob, TOKEN_ID_1, 1, "");
     }
@@ -451,7 +453,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(0)));
         facet.safeBatchTransferFrom(alice, address(0), ids, amounts, "");
     }
 
@@ -462,7 +464,7 @@ contract ERC1155FacetTest is Test {
         amounts[0] = 30;
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidSender.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidSender.selector, address(0)));
         facet.safeBatchTransferFrom(address(0), bob, ids, amounts, "");
     }
 
@@ -477,7 +479,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidArrayLength.selector, 2, 1));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidArrayLength.selector, 2, 1));
         facet.safeBatchTransferFrom(alice, bob, ids, amounts, "");
     }
 
@@ -490,7 +492,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155MissingApprovalForAll.selector, bob, alice));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155MissingApprovalForAll.selector, bob, alice));
         facet.safeBatchTransferFrom(alice, charlie, ids, amounts, "");
     }
 
@@ -511,7 +513,7 @@ contract ERC1155FacetTest is Test {
 
         vm.prank(alice);
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 50, 100, TOKEN_ID_2)
+            abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 50, 100, TOKEN_ID_2)
         );
         facet.safeBatchTransferFrom(alice, bob, ids, transferAmounts, "");
     }
@@ -543,7 +545,7 @@ contract ERC1155FacetTest is Test {
     }
 
     function test_RevertWhen_MintToZeroAddress() public {
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(0)));
         facet.mint(address(0), TOKEN_ID_1, 100);
     }
 
@@ -579,7 +581,7 @@ contract ERC1155FacetTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100;
 
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(0)));
         facet.mintBatch(address(0), ids, amounts);
     }
 
@@ -591,7 +593,7 @@ contract ERC1155FacetTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100;
 
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidArrayLength.selector, 2, 1));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidArrayLength.selector, 2, 1));
         facet.mintBatch(alice, ids, amounts);
     }
 
@@ -630,7 +632,7 @@ contract ERC1155FacetTest is Test {
     }
 
     function test_RevertWhen_BurnFromZeroAddress() public {
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidSender.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidSender.selector, address(0)));
         facet.burn(address(0), TOKEN_ID_1, 100);
     }
 
@@ -638,14 +640,16 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 100, 150, TOKEN_ID_1)
+            abi.encodeWithSelector(
+                ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 100, 150, TOKEN_ID_1
+            )
         );
         facet.burn(alice, TOKEN_ID_1, 150);
     }
 
     function test_RevertWhen_BurnZeroBalance() public {
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 0, 1, TOKEN_ID_1)
+            abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 0, 1, TOKEN_ID_1)
         );
         facet.burn(alice, TOKEN_ID_1, 1);
     }
@@ -689,7 +693,7 @@ contract ERC1155FacetTest is Test {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100;
 
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidSender.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidSender.selector, address(0)));
         facet.burnBatch(address(0), ids, amounts);
     }
 
@@ -703,7 +707,7 @@ contract ERC1155FacetTest is Test {
 
         facet.mint(alice, TOKEN_ID_1, 100);
 
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidArrayLength.selector, 2, 1));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidArrayLength.selector, 2, 1));
         facet.burnBatch(alice, ids, amounts);
     }
 
@@ -723,7 +727,7 @@ contract ERC1155FacetTest is Test {
         burnAmounts[1] = 100; // More than balance
 
         vm.expectRevert(
-            abi.encodeWithSelector(ERC1155Facet.ERC1155InsufficientBalance.selector, alice, 50, 100, TOKEN_ID_2)
+            abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InsufficientBalance.selector, alice, 50, 100, TOKEN_ID_2)
         );
         facet.burnBatch(alice, ids, burnAmounts);
     }
@@ -773,7 +777,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(receiver)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(receiver)));
         facet.safeTransferFrom(alice, address(receiver), TOKEN_ID_1, 50, "");
     }
 
@@ -797,7 +801,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(receiver)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(receiver)));
         facet.safeTransferFrom(alice, address(receiver), TOKEN_ID_1, 50, "");
     }
 
@@ -865,7 +869,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(receiver)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(receiver)));
         facet.safeBatchTransferFrom(alice, address(receiver), ids, amounts, "");
     }
 
@@ -885,7 +889,7 @@ contract ERC1155FacetTest is Test {
         facet.mint(alice, TOKEN_ID_1, 100);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155InvalidReceiver.selector, address(receiver)));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155InvalidReceiver.selector, address(receiver)));
         facet.safeBatchTransferFrom(alice, address(receiver), ids, amounts, "");
     }
 
@@ -1142,7 +1146,7 @@ contract ERC1155FacetTest is Test {
          * Bob can no longer transfer
          */
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(ERC1155Facet.ERC1155MissingApprovalForAll.selector, bob, alice));
+        vm.expectRevert(abi.encodeWithSelector(ERC1155TransferFacet.ERC1155MissingApprovalForAll.selector, bob, alice));
         facet.safeTransferFrom(alice, charlie, TOKEN_ID_1, 100, "");
     }
 }
