@@ -20,26 +20,24 @@ event URI(string _value, uint256 indexed _id);
 /**
  * @dev Storage position determined by the keccak256 hash of the diamond storage identifier.
  */
-bytes32 constant STORAGE_POSITION = keccak256("erc1155");
+bytes32 constant STORAGE_POSITION = keccak256("erc1155.metadata");
 
 /**
- * @dev ERC-8042 compliant storage struct for ERC-1155 token data.
- * @custom:storage-location erc8042:erc1155
+ * @dev ERC-8042 compliant storage struct for ERC-1155 metadata.
+ * @custom:storage-location erc8042:erc1155.metadata
  */
-struct ERC1155Storage {
-    mapping(uint256 id => mapping(address account => uint256 balance)) balanceOf;
-    mapping(address account => mapping(address operator => bool)) isApprovedForAll;
+struct ERC1155MetadataStorage {
     string uri;
     string baseURI;
     mapping(uint256 tokenId => string) tokenURIs;
 }
 
 /**
- * @notice Returns the ERC-1155 storage struct from the predefined diamond storage slot.
+ * @notice Returns the ERC-1155 metadata storage struct from the predefined diamond storage slot.
  * @dev Uses inline assembly to set the storage slot reference.
- * @return s The ERC-1155 storage struct reference.
+ * @return s The ERC-1155 metadata storage struct reference.
  */
-function getStorage() pure returns (ERC1155Storage storage s) {
+function getStorage() pure returns (ERC1155MetadataStorage storage s) {
     bytes32 position = STORAGE_POSITION;
     assembly {
         s.slot := position
@@ -54,7 +52,7 @@ function getStorage() pure returns (ERC1155Storage storage s) {
  * @param _tokenURI The token-specific URI string to be concatenated with baseURI.
  */
 function setTokenURI(uint256 _tokenId, string memory _tokenURI) {
-    ERC1155Storage storage s = getStorage();
+    ERC1155MetadataStorage storage s = getStorage();
     s.tokenURIs[_tokenId] = _tokenURI;
 
     string memory fullURI = bytes(_tokenURI).length > 0 ? string.concat(s.baseURI, _tokenURI) : s.uri;
@@ -68,7 +66,7 @@ function setTokenURI(uint256 _tokenId, string memory _tokenURI) {
  * @param _baseURI The base URI string to prepend to token-specific URIs.
  */
 function setBaseURI(string memory _baseURI) {
-    ERC1155Storage storage s = getStorage();
+    ERC1155MetadataStorage storage s = getStorage();
     s.baseURI = _baseURI;
 }
 
@@ -78,6 +76,6 @@ function setBaseURI(string memory _baseURI) {
  * @param _uri The default URI string.
  */
 function setURI(string memory _uri) {
-    ERC1155Storage storage s = getStorage();
+    ERC1155MetadataStorage storage s = getStorage();
     s.uri = _uri;
 }

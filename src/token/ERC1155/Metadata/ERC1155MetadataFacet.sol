@@ -20,26 +20,24 @@ contract ERC1155MetadataFacet {
     /**
      * @dev Storage position determined by the keccak256 hash of the diamond storage identifier.
      */
-    bytes32 constant STORAGE_POSITION = keccak256("erc1155");
+    bytes32 constant STORAGE_POSITION = keccak256("erc1155.metadata");
 
     /**
-     * @dev ERC-8042 compliant storage struct for ERC-1155 token data.
-     * @custom:storage-location erc8042:erc1155
+     * @dev ERC-8042 compliant storage struct for ERC-1155 metadata.
+     * @custom:storage-location erc8042:erc1155.metadata
      */
-    struct ERC1155Storage {
-        mapping(uint256 id => mapping(address account => uint256 balance)) balanceOf;
-        mapping(address account => mapping(address operator => bool)) isApprovedForAll;
+    struct ERC1155MetadataStorage {
         string uri;
         string baseURI;
         mapping(uint256 tokenId => string) tokenURIs;
     }
 
     /**
-     * @notice Returns the ERC-1155 storage struct from the predefined diamond storage slot.
+     * @notice Returns the ERC-1155 metadata storage struct from the predefined diamond storage slot.
      * @dev Uses inline assembly to set the storage slot reference.
-     * @return s The ERC-1155 storage struct reference.
+     * @return s The ERC-1155 metadata storage struct reference.
      */
-    function getStorage() internal pure returns (ERC1155Storage storage s) {
+    function getStorage() internal pure returns (ERC1155MetadataStorage storage s) {
         bytes32 position = STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -56,7 +54,7 @@ contract ERC1155MetadataFacet {
      * @return The URI for the token type.
      */
     function uri(uint256 _id) external view returns (string memory) {
-        ERC1155Storage storage s = getStorage();
+        ERC1155MetadataStorage storage s = getStorage();
         string memory tokenURI = s.tokenURIs[_id];
 
         return bytes(tokenURI).length > 0 ? string.concat(s.baseURI, tokenURI) : s.uri;

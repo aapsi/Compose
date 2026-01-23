@@ -36,9 +36,6 @@ bytes32 constant STORAGE_POSITION = keccak256("erc1155");
 struct ERC1155Storage {
     mapping(uint256 id => mapping(address account => uint256 balance)) balanceOf;
     mapping(address account => mapping(address operator => bool)) isApprovedForAll;
-    string uri;
-    string baseURI;
-    mapping(uint256 tokenId => string) tokenURIs;
 }
 
 /**
