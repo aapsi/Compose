@@ -5,7 +5,7 @@ pragma solidity >=0.8.30;
  * https://compose.diamonds
  */
 
-import {IERC1155Receiver} from "../../../../../src/interfaces/IERC1155Receiver.sol";
+import {IERC1155Receiver} from "../../../../src/interfaces/IERC1155Receiver.sol";
 
 /**
  * @title ERC1155ReceiverMock
